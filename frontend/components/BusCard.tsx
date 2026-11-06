@@ -3,7 +3,12 @@ import { motion } from 'framer-motion';
 import { Zap, ShieldCheck, Info } from 'lucide-react';
 import { SignalSetup } from '@/lib/types';
 import LongPositionBox from './LongPositionBox';
-interface Props { setup: SignalSetup; onBoard: (s: SignalSetup) => void; }
+
+interface Props {
+  setup: SignalSetup;
+  onBoard: (s: SignalSetup) => void;
+}
+
 export default function BusCard({ setup, onBoard }: Props) {
   return (
     <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
@@ -11,7 +16,7 @@ export default function BusCard({ setup, onBoard }: Props) {
       <LongPositionBox setup={setup} height={300} />
       <div className="flex-1 flex flex-col justify-between">
         <div>
-          <div className="flex items-center gap-2 mb-2">
+          <div className="flex items-center gap-2 mb-2 flex-wrap">
             <h3 className="text-xl font-bold text-white">{setup.pair}</h3>
             <span className="px-2 py-0.5 rounded-md text-xs font-semibold bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">{setup.timeframe}</span>
           </div>
