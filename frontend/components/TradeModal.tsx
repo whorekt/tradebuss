@@ -1,10 +1,10 @@
 'use client';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Wallet, ArrowRight, Loader2 } from 'lucide-react';
 import { SignalSetup } from '@/lib/types';
 import { useConnection, useWallet } from '@solana/wallet-adapter-react';
-import { PublicKey, VersionedTransaction } from '@solana/web3.js';
+import { VersionedTransaction } from '@solana/web3.js';
 
 interface Props {
   setup: SignalSetup | null;
@@ -15,14 +15,11 @@ interface Props {
 
 export default function TradeModal({ setup, walletBalanceUsdc, onClose }: Props) {
   const { connection } = useConnection();
-  const { publicKey, signTransaction, connected } = useWallet();
+  const { publicKey, signTransaction } = useWallet();
   
-  const [mode, setMode] = useState<'default' | 'custom'>('default');
-  const [pct, setPct] = useState(25);
+  const [customAmount, setCustomAmount] = useState<string>('1'); // Defaults to 1 USDC
   const [isSwapping, setIsSwapping] = useState(false);
   const [status, setStatus] = useState('');
-
-  const sizeUsdc = useMemo(() => (walletBalanceUsdc * (mode === 'default' ? 25 : pct)) / 100, [mode, pct, walletBalanceUsdc]);
 
   if (!setup) return null;
 
@@ -32,21 +29,27 @@ export default function TradeModal({ setup, walletBalanceUsdc, onClose }: Props)
       return;
     }
 
+    const amount = parseFloat(customAmount);
+    if (!amount || amount <= 0) {
+      setStatus('Please enter a valid amount.');
+      return;
+    }
+
     setIsSwapping(true);
     setStatus('Getting quote from Jupiter...');
 
     try {
-      // 1. Get Quote from Jupiter API
-      const amountInLamports = Math.floor(sizeUsdc * 1_000_000).toString(); // USDC has 6 decimals
+      // USDC has 6 decimals
+      const amountInLamports = Math.floor(amount * 1_000_000).toString();
+      
       const quoteResponse = await fetch(
-        `https://quote-api.jup.ag/v6/quote?inputMint=${setup.quoteToken}&outputMint=${setup.baseToken}&amount=${amountInLamports}&slippageBps=50`
+        `https://quote-api.jup.ag/v6/quote?inputMint=${setup.quoteToken}&outputMint=${setup.baseToken}&amount=${amountInLamports}&slippageBps=100`
       ).then(res => res.json());
 
-      if (!quoteResponse || quoteResponse.error) throw new Error('Failed to get quote');
+      if (!quoteResponse || quoteResponse.error) throw new Error(quoteResponse.error || 'Failed to get quote');
 
       setStatus('Preparing transaction...');
 
-      // 2. Get Swap Transaction
       const { swapTransaction } = await fetch('https://quote-api.jup.ag/v6/swap', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -59,7 +62,6 @@ export default function TradeModal({ setup, walletBalanceUsdc, onClose }: Props)
 
       setStatus('Please approve in your wallet...');
 
-      // 3. Sign and Send Transaction
       const swapTransactionBuf = Buffer.from(swapTransaction, 'base64');
       const transaction = VersionedTransaction.deserialize(swapTransactionBuf);
       const signedTransaction = await signTransaction(transaction);
@@ -78,7 +80,7 @@ export default function TradeModal({ setup, walletBalanceUsdc, onClose }: Props)
 
     } catch (error: any) {
       console.error(error);
-      setStatus(error.message || 'Swap failed');
+      setStatus(error.message || 'Swap failed. Check your balance.');
       setIsSwapping(false);
     }
   };
@@ -96,22 +98,24 @@ export default function TradeModal({ setup, walletBalanceUsdc, onClose }: Props)
             <button onClick={onClose} className="text-neutral-400 hover:text-white"><X className="w-5 h-5" /></button>
           </div>
 
-          <div className="grid grid-cols-2 gap-2 p-1 rounded-xl bg-neutral-950 mb-4">
-            {(['default','custom'] as const).map(m => (
-              <button key={m} onClick={() => setMode(m)} disabled={isSwapping}
-                className={`py-2 rounded-lg text-sm font-semibold transition ${mode===m?'bg-emerald-500 text-black':'text-neutral-400'}`}>
-                {m==='default'?'Default 25%':'Custom'}
-              </button>
-            ))}
+          <div className="mb-4">
+            <label className="text-xs text-neutral-400 mb-1 block">Amount to Swap (USDC)</label>
+            <input 
+              type="number" 
+              value={customAmount} 
+              onChange={e => setCustomAmount(e.target.value)}
+              disabled={isSwapping}
+              className="w-full px-3 py-2 rounded-lg bg-neutral-950 border border-neutral-800 text-white font-mono focus:border-emerald-500 outline-none"
+              placeholder="1.00"
+            />
           </div>
 
           <div className="rounded-xl bg-neutral-950 p-3 mb-4 space-y-1 text-sm">
-            <div className="flex justify-between text-neutral-300"><span>Size</span><span className="font-mono font-bold text-white">{sizeUsdc.toFixed(2)} USDC</span></div>
             <div className="flex justify-between text-emerald-400"><span>Target TP</span><span className="font-mono">{setup.takeProfit}</span></div>
             <div className="flex justify-between text-red-400"><span>Stop Loss</span><span className="font-mono">{setup.stopLoss}</span></div>
           </div>
 
-          {status && <div className="text-xs text-center text-cyan-300 mb-2 font-mono break-all">{status}</div>}
+          {status && <div className="text-xs text-center text-cyan-300 mb-2 font-mono break-all p-2 bg-black rounded">{status}</div>}
 
           <button disabled={isSwapping}
             onClick={handleSwap}
