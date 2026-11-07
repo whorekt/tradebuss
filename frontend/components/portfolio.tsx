@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useConnection, useWallet } from '@solana/wallet-adapter-react';
 import { LAMPORTS_PER_SOL, PublicKey } from '@solana/web3.js';
-import { Loader2, TrendingUp, TrendingDown, Wallet } from 'lucide-react';
+import { Loader2, TrendingUp, TrendingDown } from 'lucide-react';
 
 const USDC_MINT = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
 
@@ -12,12 +12,8 @@ export default function Portfolio() {
   const [solBalance, setSolBalance] = useState<number>(0);
   const [usdcBalance, setUsdcBalance] = useState<number>(0);
   const [loading, setLoading] = useState(false);
-  const [manualCA, setManualCA] = useState('');
-  const [manualAmount, setManualAmount] = useState('');
-  const [manualTokens, setManualTokens] = useState<any[]>([]);
   const [showAth, setShowAth] = useState(false);
 
-  // Fetch live balances directly from the blockchain
   useEffect(() => {
     if (!publicKey) return;
     const fetchBalances = async () => {
@@ -42,7 +38,6 @@ export default function Portfolio() {
   if (!publicKey) {
     return (
       <div className="flex flex-col items-center justify-center p-8 bg-neutral-900 border border-neutral-800 rounded-xl mt-4">
-        <Wallet className="w-8 h-8 text-neutral-500 mb-2" />
         <p className="text-neutral-400 text-sm">Connect wallet to view portfolio</p>
       </div>
     );
@@ -58,7 +53,6 @@ export default function Portfolio() {
         {loading && <Loader2 className="w-4 h-4 text-emerald-400 animate-spin" />}
       </div>
 
-      {/* Total Portfolio Value & ATH/ATL Toggle */}
       <div className="bg-gradient-to-br from-neutral-900 to-neutral-950 border border-neutral-800 rounded-xl p-4">
         <p className="text-xs text-neutral-500 mb-1">Total Portfolio Value</p>
         <h3 className="text-3xl font-black text-white">${totalUsd.toFixed(2)}</h3>
@@ -79,9 +73,7 @@ export default function Portfolio() {
         </div>
       </div>
 
-      {/* Token List */}
       <div className="bg-neutral-900 border border-neutral-800 rounded-xl overflow-hidden">
-        {/* SOL */}
         <div className="flex items-center justify-between p-4 border-b border-neutral-800">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-full bg-purple-500/20 flex items-center justify-center text-purple-400 font-bold text-xs">SOL</div>
@@ -96,7 +88,6 @@ export default function Portfolio() {
           </div>
         </div>
 
-        {/* USDC */}
         <div className="flex items-center justify-between p-4">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400 font-bold text-xs">USDC</div>
