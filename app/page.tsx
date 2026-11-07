@@ -4,6 +4,7 @@ import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import TimeframeSelector from '@/frontend/components/TimeframeSelector';
 import BusCard from '@/frontend/components/BusCard';
 import TradeModal from '@/frontend/components/TradeModal';
+import Portfolio from '@/frontend/components/Portfolio';
 import { SignalSetup, Timeframe } from '@/lib/types';
 import { Search, Loader2 } from 'lucide-react';
 
@@ -97,6 +98,8 @@ export default function Home() {
         </div>
 
         {error && <div className="text-red-400 text-sm text-center bg-red-500/10 py-2 rounded-lg">{error}</div>}
+
+        <Portfolio />
 
         <div className="pt-4">
           <h2 className="text-sm font-bold text-neutral-400 uppercase tracking-wider mb-3">Live Setups</h2>
