@@ -9,25 +9,23 @@ export default function TokenList() {
 
   useEffect(() => {
     fetch('/api')
-      .then(res => res.json())
+      .then(async (res) => {
+        if (!res.ok) {
+          const errorData = await res.json();
+          throw new Error(errorData.error || 'Server error');
+        }
+        return res.json();
+      })
       .then(data => {
-        // Debug: log what DexScreener actually sent us
-        console.log("DexScreener Data:", data);
-
-        // Ensure data is an array
         const tokenArray = Array.isArray(data) ? data : [];
-        
-        // Filter for Solana tokens
         const solanaTokens = tokenArray.filter((t: any) => 
           t.chainId === 'solana' || t.chainId === 'sol'
         );
-
         setTokens(solanaTokens.slice(0, 10));
         setLoading(false);
       })
       .catch((err) => {
-        console.error(err);
-        setError('Failed to load tokens');
+        setError(err.message);
         setLoading(false);
       });
   }, []);
@@ -41,7 +39,11 @@ export default function TokenList() {
   }
 
   if (error) {
-    return <div className="text-center text-red-400 p-4 text-sm bg-red-500/10 rounded-xl">{error}</div>;
+    return (
+      <div className="text-center text-red-400 p-4 text-sm bg-red-500/10 border border-red-500/20 rounded-xl">
+        Error: {error}
+      </div>
+    );
   }
 
   if (tokens.length === 0) {
@@ -54,13 +56,11 @@ export default function TokenList() {
 
   return (
     <div className="bg-neutral-900 border border-neutral-800 rounded-xl overflow-hidden">
-      {/* Header */}
       <div className="flex items-center gap-2 p-3 border-b border-neutral-800 bg-neutral-950">
         <Flame className="w-4 h-4 text-orange-500" />
-        <span className="text-xs font-bold text-neutral-400 uppercase tracking-wider">Top Boosted</span>
+        <span className="text-xs font-bold text-neutral-400 uppercase tracking-wider">Top Boosted (Solana)</span>
       </div>
 
-      {/* List */}
       {tokens.map((t, i) => (
         <div key={i} className="flex items-center justify-between p-3 border-b border-neutral-800 last:border-0 hover:bg-neutral-800 transition-colors">
           <div className="flex items-center gap-3">
