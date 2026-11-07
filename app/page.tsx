@@ -28,12 +28,16 @@ export default function Home() {
 
   const setups = tf === '1h' ? (searchResult ? [searchResult] : [SOL_SETUP]) : [];
 
-  const handleSearch = async () => {
-    if (!searchCA) return;
+  const handleSearch = async (caToSearch?: string) => {
+    const address = caToSearch || searchCA;
+    if (!address) return;
+    
+    setSearchCA(address); // Update input box
     setIsSearching(true);
     setError('');
+    
     try {
-      const res = await fetch('https://api.dexscreener.com/latest/dex/tokens/' + searchCA);
+      const res = await fetch('https://api.dexscreener.com/latest/dex/tokens/' + address);
       const data = await res.json();
       if (!data.pairs || data.pairs.length === 0) throw new Error('Token not found');
       
@@ -93,7 +97,7 @@ export default function Home() {
             className="w-full pl-10 pr-24 py-3 rounded-xl bg-neutral-900 border border-neutral-800 text-white font-mono text-sm focus:border-emerald-500 outline-none" 
           />
           <button 
-            onClick={handleSearch} 
+            onClick={() => handleSearch()} 
             disabled={isSearching} 
             className="absolute right-2 px-4 py-1.5 rounded-lg bg-emerald-500 text-black font-bold text-sm hover:bg-emerald-400 disabled:opacity-50"
           >
@@ -103,7 +107,7 @@ export default function Home() {
 
         {error && <div className="text-red-400 text-sm text-center bg-red-500/10 py-2 rounded-lg">{error}</div>}
 
-        {/* LIVE SETUPS (TRADING BOX MOVED UP) */}
+        {/* LIVE SETUPS */}
         <div className="pt-2">
           <h2 className="text-sm font-bold text-neutral-400 uppercase tracking-wider mb-3">Live Setups</h2>
           {setups.length === 0 ? (
@@ -115,12 +119,12 @@ export default function Home() {
           )}
         </div>
 
-        {/* PORTFOLIO (MOVED DOWN) */}
+        {/* PORTFOLIO */}
         <div className="pt-4">
           <Portfolio />
         </div>
 
-        {/* TOKEN TABS */}
+        {/* TOKEN TABS & LIST (Passed handleSearch) */}
         <div className="mt-8">
           <div className="flex items-center gap-1 p-1 bg-neutral-900 rounded-lg border border-neutral-800 mb-4">
             <button className="flex-1 py-2 rounded-md text-xs font-bold flex items-center justify-center gap-1 bg-neutral-800 text-white">🔥 Trending</button>
@@ -128,8 +132,7 @@ export default function Home() {
             <button className="flex-1 py-2 rounded-md text-xs font-bold flex items-center justify-center gap-1 text-neutral-500">📊 Volume</button>
           </div>
           
-          {/* THIS IS THE NEW TOKEN LIST COMPONENT */}
-          <TokenList />
+          <TokenList onTokenSelect={handleSearch} />
         </div>
 
       </div>
