@@ -7,6 +7,7 @@ import TradeModal from '@/frontend/components/TradeModal';
 import Portfolio from '@/frontend/components/Portfolio';
 import TokenList from '@/frontend/components/TokenList';
 import BottomNav from '@/frontend/components/BottomNav';
+import Settings from '@/frontend/components/Settings';
 import { SignalSetup, Timeframe } from '@/lib/types';
 import { Search, Loader2 } from 'lucide-react';
 
@@ -77,9 +78,9 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen bg-neutral-950 pb-24"> {/* pb-24 for bottom nav space */}
+    <main className="min-h-screen bg-neutral-950 pb-24">
       
-      {/* HEADER */}
+      {/* HEADER & SEARCH */}
       <div className="max-w-2xl mx-auto p-4 space-y-4">
         <div className="flex items-center justify-between py-2">
           <h1 className="text-2xl font-black">
@@ -88,7 +89,6 @@ export default function Home() {
           <WalletMultiButton style={{ backgroundColor: '#10b981', borderRadius: '0.5rem', height: '40px' }} />
         </div>
 
-        {/* SEARCH BAR (Global) */}
         <div className="relative flex items-center mb-6">
           <Search className="absolute left-3 text-neutral-500 w-5 h-5" />
           <input 
@@ -120,7 +120,7 @@ export default function Home() {
           </div>
         )}
 
-        {/* 2. TRADE TAB (Live Setups) */}
+        {/* 2. TRADE TAB */}
         {activeTab === 'trade' && (
           <div className="space-y-4">
             <TimeframeSelector selected={tf} onChange={setTf} />
@@ -146,8 +146,9 @@ export default function Home() {
 
         {/* 4. SETTINGS TAB */}
         {activeTab === 'settings' && (
-          <div className="text-center py-20 text-neutral-500">
-            Settings coming soon...
+          <div className="space-y-4">
+            <h2 className="text-sm font-bold text-neutral-400 uppercase tracking-wider">Settings</h2>
+            <Settings />
           </div>
         )}
       </div>
