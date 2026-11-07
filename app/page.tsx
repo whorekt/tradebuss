@@ -5,6 +5,7 @@ import TimeframeSelector from '@/frontend/components/TimeframeSelector';
 import BusCard from '@/frontend/components/BusCard';
 import TradeModal from '@/frontend/components/TradeModal';
 import Portfolio from '@/frontend/components/Portfolio';
+import TokenList from '@/frontend/components/TokenList';
 import { SignalSetup, Timeframe } from '@/lib/types';
 import { Search, Loader2 } from 'lucide-react';
 
@@ -127,10 +128,8 @@ export default function Home() {
             <button className="flex-1 py-2 rounded-md text-xs font-bold flex items-center justify-center gap-1 text-neutral-500">📊 Volume</button>
           </div>
           
-          <div className="text-center p-4 bg-neutral-900/50 border border-neutral-800 rounded-xl">
-             <p className="text-xs text-neutral-500">Trending tokens list requires DexScreener API proxy setup.</p>
-             <p className="text-[10px] text-neutral-600 mt-1">Use the search bar above to trade specific contract addresses.</p>
-          </div>
+          {/* THIS IS THE NEW TOKEN LIST COMPONENT */}
+          <TokenList />
         </div>
 
       </div>
