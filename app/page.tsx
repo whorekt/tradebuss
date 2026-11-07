@@ -6,6 +6,7 @@ import BusCard from '@/frontend/components/BusCard';
 import TradeModal from '@/frontend/components/TradeModal';
 import Portfolio from '@/frontend/components/Portfolio';
 import TokenList from '@/frontend/components/TokenList';
+import BottomNav from '@/frontend/components/BottomNav';
 import { SignalSetup, Timeframe } from '@/lib/types';
 import { Search, Loader2 } from 'lucide-react';
 
@@ -25,6 +26,9 @@ export default function Home() {
   const [isSearching, setIsSearching] = useState(false);
   const [searchResult, setSearchResult] = useState<SignalSetup | null>(null);
   const [error, setError] = useState('');
+  
+  // TAB STATE
+  const [activeTab, setActiveTab] = useState('trade');
 
   const setups = tf === '1h' ? (searchResult ? [searchResult] : [SOL_SETUP]) : [];
 
@@ -32,9 +36,10 @@ export default function Home() {
     const address = caToSearch || searchCA;
     if (!address) return;
     
-    setSearchCA(address); // Update input box
+    setSearchCA(address);
     setIsSearching(true);
     setError('');
+    setActiveTab('trade'); // Auto-switch to trade tab when searching
     
     try {
       const res = await fetch('https://api.dexscreener.com/latest/dex/tokens/' + address);
@@ -72,12 +77,10 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen bg-neutral-950 pb-20">
-      <TimeframeSelector selected={tf} onChange={setTf} />
+    <main className="min-h-screen bg-neutral-950 pb-24"> {/* pb-24 for bottom nav space */}
       
+      {/* HEADER */}
       <div className="max-w-2xl mx-auto p-4 space-y-4">
-        
-        {/* HEADER */}
         <div className="flex items-center justify-between py-2">
           <h1 className="text-2xl font-black">
             <span className="text-emerald-400">Trade</span><span className="text-cyan-400">Bus</span>
@@ -85,15 +88,15 @@ export default function Home() {
           <WalletMultiButton style={{ backgroundColor: '#10b981', borderRadius: '0.5rem', height: '40px' }} />
         </div>
 
-        {/* SEARCH BAR */}
-        <div className="relative flex items-center">
+        {/* SEARCH BAR (Global) */}
+        <div className="relative flex items-center mb-6">
           <Search className="absolute left-3 text-neutral-500 w-5 h-5" />
           <input 
             type="text" 
             value={searchCA} 
             onChange={(e) => setSearchCA(e.target.value)} 
             onKeyDown={(e) => e.key === 'Enter' && handleSearch()} 
-            placeholder="Search any token CA..." 
+            placeholder="Search token CA..." 
             className="w-full pl-10 pr-24 py-3 rounded-xl bg-neutral-900 border border-neutral-800 text-white font-mono text-sm focus:border-emerald-500 outline-none" 
           />
           <button 
@@ -107,37 +110,52 @@ export default function Home() {
 
         {error && <div className="text-red-400 text-sm text-center bg-red-500/10 py-2 rounded-lg">{error}</div>}
 
-        {/* LIVE SETUPS */}
-        <div className="pt-2">
-          <h2 className="text-sm font-bold text-neutral-400 uppercase tracking-wider mb-3">Live Setups</h2>
-          {setups.length === 0 ? (
-            <div className="text-center text-neutral-500 py-8 bg-neutral-900 rounded-xl border border-neutral-800">
-              No clear entries on this timeframe.
-            </div>
-          ) : (
-            setups.map(s => <BusCard key={s.id} setup={s} onBoard={setModalSetup} />)
-          )}
-        </div>
-
-        {/* PORTFOLIO */}
-        <div className="pt-4">
-          <Portfolio />
-        </div>
-
-        {/* TOKEN TABS & LIST (Passed handleSearch) */}
-        <div className="mt-8">
-          <div className="flex items-center gap-1 p-1 bg-neutral-900 rounded-lg border border-neutral-800 mb-4">
-            <button className="flex-1 py-2 rounded-md text-xs font-bold flex items-center justify-center gap-1 bg-neutral-800 text-white">🔥 Trending</button>
-            <button className="flex-1 py-2 rounded-md text-xs font-bold flex items-center justify-center gap-1 text-neutral-500">🕒 New</button>
-            <button className="flex-1 py-2 rounded-md text-xs font-bold flex items-center justify-center gap-1 text-neutral-500">📊 Volume</button>
+        {/* --- TAB CONTENT --- */}
+        
+        {/* 1. MARKET TAB */}
+        {activeTab === 'market' && (
+          <div className="space-y-4">
+            <h2 className="text-sm font-bold text-neutral-400 uppercase tracking-wider">Market</h2>
+            <TokenList onTokenSelect={handleSearch} />
           </div>
-          
-          <TokenList onTokenSelect={handleSearch} />
-        </div>
+        )}
 
+        {/* 2. TRADE TAB (Live Setups) */}
+        {activeTab === 'trade' && (
+          <div className="space-y-4">
+            <TimeframeSelector selected={tf} onChange={setTf} />
+            
+            <h2 className="text-sm font-bold text-neutral-400 uppercase tracking-wider mb-3">Live Setups</h2>
+            {setups.length === 0 ? (
+              <div className="text-center text-neutral-500 py-8 bg-neutral-900 rounded-xl border border-neutral-800">
+                No clear entries on this timeframe.
+              </div>
+            ) : (
+              setups.map(s => <BusCard key={s.id} setup={s} onBoard={setModalSetup} />)
+            )}
+          </div>
+        )}
+
+        {/* 3. PORTFOLIO TAB */}
+        {activeTab === 'portfolio' && (
+          <div className="space-y-4">
+            <h2 className="text-sm font-bold text-neutral-400 uppercase tracking-wider">Portfolio</h2>
+            <Portfolio />
+          </div>
+        )}
+
+        {/* 4. SETTINGS TAB */}
+        {activeTab === 'settings' && (
+          <div className="text-center py-20 text-neutral-500">
+            Settings coming soon...
+          </div>
+        )}
       </div>
 
       <TradeModal setup={modalSetup} walletBalanceUsdc={100} onClose={() => setModalSetup(null)} onConfirm={() => setModalSetup(null)} />
+      
+      {/* BOTTOM NAVIGATION */}
+      <BottomNav activeTab={activeTab} setActiveTab={setActiveTab} />
     </main>
   );
 }
