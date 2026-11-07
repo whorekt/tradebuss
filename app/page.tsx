@@ -5,17 +5,12 @@ import TimeframeSelector from '@/frontend/components/TimeframeSelector';
 import BusCard from '@/frontend/components/BusCard';
 import TradeModal from '@/frontend/components/TradeModal';
 import ActivePositions from '@/frontend/components/ActivePositions';
-import Portfolio from '@/frontend/components/Portfolio';
+import Portfolio from '@/frontend/components/Portfolio'; // 👈 IMPORTED
 import { SignalSetup, Timeframe } from '@/lib/types';
-import { Search, Loader2 } from 'lucide-react';
+import { Search, Loader2, Flame, Clock, BarChart3 } from 'lucide-react';
 
 const SOL_SETUP: SignalSetup = {
-  id: 'sol-1', pair: 'SOL/USDC', 
-  baseToken: 'So11111111111111111111111111111111111111112', 
-  quoteToken: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v', 
-  timeframe: '1h', entry: 142.50, takeProfit: 178.40, stopLoss: 130.10,
-  tpPct: 25.6, slPct: 8.3, rrRatio: 3.1, rsi: 26.1, ema200: 135.0, support: 140.0,
-  confluences: ['RSI<=30', 'Above 200EMA', 'At Support'], createdAt: Date.now()
+  id: 'sol-1', pair: 'SOL/USDC', baseToken: 'So11111111111111111111111111111111111111112', quoteToken: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v', timeframe: '1h', entry: 142.50, takeProfit: 178.40, stopLoss: 130.10, tpPct: 25.6, slPct: 8.3, rrRatio: 3.1, rsi: 26.1, ema200: 135.0, support: 140.0, confluences: ['RSI<=30', 'Above 200EMA', 'At Support'], createdAt: Date.now()
 };
 
 export default function Home() {
@@ -25,6 +20,7 @@ export default function Home() {
   const [isSearching, setIsSearching] = useState(false);
   const [searchResult, setSearchResult] = useState<SignalSetup | null>(null);
   const [error, setError] = useState('');
+  const [activeTab, setActiveTab] = useState<'trending' | 'new' | 'volume'>('trending');
 
   const setups = tf === '1h' ? (searchResult ? [searchResult] : [SOL_SETUP]) : [];
 
@@ -33,7 +29,7 @@ export default function Home() {
     setIsSearching(true);
     setError('');
     try {
-      const res = await fetch('https://api.dexscreener.com/latest/dex/tokens/' + searchCA);
+      const res = await fetch(`https://api.dexscreener.com/latest/dex/tokens/${searchCA}`);
       const data = await res.json();
       if (!data.pairs || data.pairs.length === 0) throw new Error('Token not found');
       
@@ -42,22 +38,7 @@ export default function Home() {
 
       const price = parseFloat(pair.priceUsd);
       const newSetup: SignalSetup = {
-        id: pair.pairAddress, 
-        pair: pair.baseToken.symbol + '/USDC', 
-        baseToken: pair.baseToken.address, 
-        quoteToken: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v', 
-        timeframe: tf, 
-        entry: price, 
-        takeProfit: price * 1.25, 
-        stopLoss: price * 0.92, 
-        tpPct: 25, 
-        slPct: 8, 
-        rrRatio: 3.1, 
-        rsi: 28.4, 
-        ema200: price * 0.95, 
-        support: price * 0.98, 
-        confluences: ['DexScreener Verified', 'Live Price'], 
-        createdAt: Date.now()
+        id: pair.pairAddress, pair: `${pair.baseToken.symbol}/USDC`, baseToken: pair.baseToken.address, quoteToken: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v', timeframe: tf, entry: price, takeProfit: price * 1.25, stopLoss: price * 0.92, tpPct: 25, slPct: 8, rrRatio: 3.1, rsi: 28.4, ema200: price * 0.95, support: price * 0.98, confluences: ['DexScreener Verified', 'Live Price'], createdAt: Date.now()
       };
       setSearchResult(newSetup);
     } catch (err: any) {
@@ -79,29 +60,38 @@ export default function Home() {
           <WalletMultiButton style={{ backgroundColor: '#10b981', borderRadius: '0.5rem', height: '40px' }} />
         </div>
 
+        {/* SEARCH BAR */}
         <div className="relative flex items-center">
           <Search className="absolute left-3 text-neutral-500 w-5 h-5" />
-          <input 
-            type="text" 
-            value={searchCA} 
-            onChange={(e) => setSearchCA(e.target.value)} 
-            onKeyDown={(e) => e.key === 'Enter' && handleSearch()} 
-            placeholder="Search any token CA..." 
-            className="w-full pl-10 pr-24 py-3 rounded-xl bg-neutral-900 border border-neutral-800 text-white font-mono text-sm focus:border-emerald-500 outline-none" 
-          />
-          <button 
-            onClick={handleSearch} 
-            disabled={isSearching} 
-            className="absolute right-2 px-4 py-1.5 rounded-lg bg-emerald-500 text-black font-bold text-sm hover:bg-emerald-400 disabled:opacity-50"
-          >
+          <input type="text" value={searchCA} onChange={(e) => setSearchCA(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleSearch()} placeholder="Search any token CA..." className="w-full pl-10 pr-24 py-3 rounded-xl bg-neutral-900 border border-neutral-800 text-white font-mono text-sm focus:border-emerald-500 outline-none" />
+          <button onClick={handleSearch} disabled={isSearching} className="absolute right-2 px-4 py-1.5 rounded-lg bg-emerald-500 text-black font-bold text-sm hover:bg-emerald-400 disabled:opacity-50">
             {isSearching ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Search'}
           </button>
         </div>
 
         {error && <div className="text-red-400 text-sm text-center bg-red-500/10 py-2 rounded-lg">{error}</div>}
 
+        {/* PORTFOLIO SECTION */}
         <Portfolio />
 
+        {/* TOKEN LIST BAR */}
+        <div className="mt-8">
+          <div className="flex items-center gap-1 p-1 bg-neutral-900 rounded-lg border border-neutral-800 mb-4">
+            <button onClick={() => setActiveTab('trending')} className={`flex-1 py-2 rounded-md text-xs font-bold flex items-center justify-center gap-1 ${activeTab === 'trending' ? 'bg-neutral-800 text-white' : 'text-neutral-500'}`}><Flame className="w-3 h-3" /> Trending</button>
+            <button onClick={() => setActiveTab('new')} className={`flex-1 py-2 rounded-md text-xs font-bold flex items-center justify-center gap-1 ${activeTab === 'new' ? 'bg-neutral-800 text-white' : 'text-neutral-500'}`}><Clock className="w-3 h-3" /> New</button>
+            <button onClick={() => setActiveTab('volume')} className={`flex-1 py-2 rounded-md text-xs font-bold flex items-center justify-center gap-1 ${activeTab === 'volume' ? 'bg-neutral-800 text-white' : 'text-neutral-500'}`}><BarChart3 className="w-3 h-3" /> Volume</button>
+          </div>
+          
+          <div className="space-y-2">
+            {/* Placeholder Token List (DexScreener API doesn't provide a global list easily without a backend proxy) */}
+            <div className="text-center p-4 bg-neutral-900/50 border border-neutral-800 rounded-xl">
+               <p className="text-xs text-neutral-500">Trending tokens list requires DexScreener API proxy setup.</p>
+               <p className="text-[10px] text-neutral-600 mt-1">Use the search bar above to trade specific contract addresses.</p>
+            </div>
+          </div>
+        </div>
+
+        {/* BUS CARDS */}
         <div className="pt-4">
           <h2 className="text-sm font-bold text-neutral-400 uppercase tracking-wider mb-3">Live Setups</h2>
           {setups.length === 0 ? (
