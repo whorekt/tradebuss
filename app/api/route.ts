@@ -2,18 +2,14 @@ import { NextResponse } from 'next/server';
 
 export async function GET() {
   try {
-    const res = await fetch('https://api.dexscreener.com/token-boosts/top/v1', {
-      headers: {
-        'Accept': 'application/json',
-        'User-Agent': 'Mozilla/5.0'
-      },
+    // Fetch recently created tokens from Jupiter (includes logos & symbols)
+    const res = await fetch('https://api.jup.ag/tokens/v2/recent', {
+      headers: { 'Accept': 'application/json' },
       cache: 'no-store'
     });
     
-    if (!res.ok) {
-      throw new Error(`DexScreener responded with status: ${res.status}`);
-    }
-
+    if (!res.ok) throw new Error('Jupiter API failed');
+    
     const data = await res.json();
     return NextResponse.json(data);
   } catch (error: any) {
