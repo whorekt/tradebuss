@@ -28,8 +28,8 @@ export default function Home() {
   const [searchResult, setSearchResult] = useState<SignalSetup | null>(null);
   const [error, setError] = useState('');
   
-  // TAB STATE - Defaults to 'trade' (Home)
-  const [activeTab, setActiveTab] = useState('trade');
+  // Default tab is now 'market'
+  const [activeTab, setActiveTab] = useState('market');
 
   const setups = tf === '1h' ? (searchResult ? [searchResult] : [SOL_SETUP]) : [];
 
@@ -84,10 +84,11 @@ export default function Home() {
         
         {/* --- TAB CONTENT --- */}
         
-        {/* 1. HOME / TRADE TAB (Contains Header, Logo, Search, Wallet) */}
-        {activeTab === 'trade' && (
+        {/* 1. MARKET TAB (Now Default - Contains Header, Logo, Search, Wallet) */}
+        {activeTab === 'market' && (
           <div className="space-y-4">
-            {/* HEADER & WALLET (Only on Home) */}
+            
+            {/* HEADER & WALLET (Only on Market) */}
             <div className="flex items-center justify-between py-2">
               <h1 className="text-2xl font-black">
                 <span className="text-emerald-400">Trade</span><span className="text-cyan-400">Bus</span>
@@ -95,7 +96,7 @@ export default function Home() {
               <WalletMultiButton style={{ backgroundColor: '#10b981', borderRadius: '0.5rem', height: '40px' }} />
             </div>
 
-            {/* SEARCH BAR (Only on Home) */}
+            {/* SEARCH BAR (Only on Market) */}
             <div className="relative flex items-center mb-6">
               <Search className="absolute left-3 text-neutral-500 w-5 h-5" />
               <input 
@@ -117,6 +118,14 @@ export default function Home() {
 
             {error && <div className="text-red-400 text-sm text-center bg-red-500/10 py-2 rounded-lg">{error}</div>}
 
+            <h2 className="text-sm font-bold text-neutral-400 uppercase tracking-wider mb-3">Market Tokens</h2>
+            <TokenList onTokenSelect={handleSearch} />
+          </div>
+        )}
+
+        {/* 2. TRADE TAB (Clean, no header) */}
+        {activeTab === 'trade' && (
+          <div className="space-y-4 pt-4">
             <TimeframeSelector selected={tf} onChange={setTf} />
             
             <h2 className="text-sm font-bold text-neutral-400 uppercase tracking-wider mb-3">Live Setups</h2>
@@ -127,14 +136,6 @@ export default function Home() {
             ) : (
               setups.map(s => <BusCard key={s.id} setup={s} onBoard={setModalSetup} />)
             )}
-          </div>
-        )}
-
-        {/* 2. MARKET TAB (Clean, no header) */}
-        {activeTab === 'market' && (
-          <div className="space-y-4 pt-4">
-            <h2 className="text-lg font-bold text-white mb-4">Market</h2>
-            <TokenList onTokenSelect={handleSearch} />
           </div>
         )}
 
