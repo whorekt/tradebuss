@@ -2,8 +2,7 @@
 import { useWallet } from '@solana/wallet-adapter-react';
 import { 
   Home, Layers, Heart, PieChart, Bell, BarChart3, 
-  Megaphone, ArrowLeftRight, Settings as SettingsIcon, 
-  LogOut, ChevronRight 
+  Megaphone, ArrowLeftRight, LogOut
 } from 'lucide-react';
 
 export default function Settings() {
@@ -13,7 +12,7 @@ export default function Settings() {
     { name: 'Home', icon: Home, active: false },
     { name: 'Assets', icon: Layers, active: false },
     { name: 'Watchlist', icon: Heart, active: false },
-    { name: 'Portfolio', icon: PieChart, active: true }, // Highlighted in your screenshot
+    { name: 'Portfolio', icon: PieChart, active: true },
     { name: 'Price Alerts', icon: Bell, active: false },
     { name: 'Market', icon: BarChart3, active: false },
     { name: 'News', icon: Megaphone, active: false },
@@ -45,15 +44,10 @@ export default function Settings() {
         })}
       </div>
 
-      {/* SETTINGS SECTION */}
+      {/* SETTINGS SECTION (Removed the Settings button inside) */}
       <div className="space-y-1">
         <h3 className="text-xs font-bold text-neutral-500 uppercase tracking-wider mb-3 px-2">Settings</h3>
         
-        <button className="w-full flex items-center gap-4 px-4 py-3.5 rounded-xl text-neutral-300 hover:bg-neutral-800/50 transition-colors">
-          <SettingsIcon className="w-5 h-5 text-neutral-400" />
-          <span className="text-sm font-semibold">Settings</span>
-        </button>
-
         <div className="w-full h-[1px] bg-neutral-800 my-2" />
 
         {/* Currency & Language */}
