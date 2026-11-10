@@ -1,22 +1,66 @@
 'use client';
-import { useState } from 'react';
-import { useWallet } from '@solana/wallet-adapter-react';
-import { TrendingUp, TrendingDown, Wallet } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { useConnection, useWallet } from '@solana/wallet-adapter-react';
+import { LAMPORTS_PER_SOL, PublicKey } from '@solana/web3.js';
+import { TrendingUp, TrendingDown, Wallet, Loader2 } from 'lucide-react';
+
+const USDC_MINT = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
 
 export default function Portfolio() {
+  const { connection } = useConnection();
   const { publicKey } = useWallet();
+  const [solBalance, setSolBalance] = useState<number>(0);
+  const [usdcBalance, setUsdcBalance] = useState<number>(0);
+  const [loading, setLoading] = useState(false);
   const [showAth, setShowAth] = useState(false);
 
-  const solBalance = 2.5;
-  const usdcBalance = 150;
-  const solPrice = 145.20;
+  useEffect(() => {
+    if (!publicKey) return;
+    
+    const fetchBalances = async () => {
+      setLoading(true);
+      try {
+        // 1. Fetch real SOL balance from Helius
+        const solBal = await connection.getBalance(publicKey);
+        setSolBalance(solBal / LAMPORTS_PER_SOL);
+
+        // 2. Fetch real USDC balance from Helius
+        const tokenAccounts = await connection.getParsedTokenAccountsByOwner(publicKey, { 
+          mint: new PublicKey(USDC_MINT) 
+        });
+        
+        if (tokenAccounts.value.length > 0) {
+          setUsdcBalance(tokenAccounts.value[0].account.data.parsed.info.tokenAmount.uiAmount || 0);
+        }
+      } catch (e) {
+        console.error("Failed to fetch balances:", e);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchBalances();
+  }, [publicKey, connection]);
+
+  if (!publicKey) {
+    return (
+      <div className="flex flex-col items-center justify-center p-8 bg-neutral-900 border border-neutral-800 rounded-xl mt-4">
+        <Wallet className="w-8 h-8 text-neutral-500 mb-2" />
+        <p className="text-neutral-400 text-sm">Connect wallet to view portfolio</p>
+      </div>
+    );
+  }
+
+  const solPrice = 145.20; // We can make this live later
   const solValue = solBalance * solPrice;
   const totalValue = solValue + usdcBalance;
 
   return (
     <div className="space-y-4">
       <div className="bg-gradient-to-br from-neutral-900 to-neutral-950 border border-neutral-800 rounded-xl p-4">
-        <p className="text-xs text-neutral-500 mb-1">Total Balance</p>
+        <p className="text-xs text-neutral-500 mb-1 flex items-center gap-2">
+          Total Balance {loading && <Loader2 className="w-3 h-3 animate-spin text-emerald-400" />}
+        </p>
         <h3 className="text-3xl font-black text-white">${totalValue.toFixed(2)}</h3>
         
         <div className="flex gap-2 mt-4">
@@ -39,7 +83,6 @@ export default function Portfolio() {
         {/* SOL Row */}
         <div className="flex items-center justify-between p-4 border-b border-neutral-800">
           <div className="flex items-center gap-3">
-            {/* SOL Logo SVG */}
             <div className="w-10 h-10 rounded-full bg-black flex items-center justify-center">
               <svg className="w-6 h-6" viewBox="0 0 397.7 311.3">
                 <linearGradient id="sol-grad" x1="360.879" x2="141.213" y1="351.455" y2="-69.294" gradientUnits="userSpaceOnUse">
@@ -52,7 +95,7 @@ export default function Portfolio() {
             </div>
             <div>
               <p className="font-bold text-white text-sm">Solana</p>
-              <p className="text-xs text-neutral-500">{solBalance} SOL</p>
+              <p className="text-xs text-neutral-500">{solBalance.toFixed(4)} SOL</p>
             </div>
           </div>
           <div className="text-right">
@@ -64,7 +107,6 @@ export default function Portfolio() {
         {/* USDC Row */}
         <div className="flex items-center justify-between p-4">
           <div className="flex items-center gap-3">
-            {/* USDC Logo SVG */}
             <div className="w-10 h-10 rounded-full bg-[#2775CA] flex items-center justify-center border-2 border-white/20">
                <svg className="w-6 h-6 text-white" viewBox="0 0 2000 2000" fill="currentColor">
                  <path d="M1000 0C447.7 0 0 447.7 0 1000s447.7 1000 1000 1000 1000-447.7 1000-1000S1552.3 0 1000 0zm0 1850c-469.3 0-850-380.7-850-850S530.7 150 1000 150s850 380.7 850 850-380.7 850-850 850z"/>
@@ -73,7 +115,7 @@ export default function Portfolio() {
             </div>
             <div>
               <p className="font-bold text-white text-sm">USD Coin</p>
-              <p className="text-xs text-neutral-500">{usdcBalance} USDC</p>
+              <p className="text-xs text-neutral-500">{usdcBalance.toFixed(2)} USDC</p>
             </div>
           </div>
           <div className="text-right">
