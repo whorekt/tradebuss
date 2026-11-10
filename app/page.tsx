@@ -28,7 +28,6 @@ export default function Home() {
   const [searchResult, setSearchResult] = useState<SignalSetup | null>(null);
   const [error, setError] = useState('');
   
-  // Default tab is now 'market'
   const [activeTab, setActiveTab] = useState('market');
 
   const setups = tf === '1h' ? (searchResult ? [searchResult] : [SOL_SETUP]) : [];
@@ -40,7 +39,7 @@ export default function Home() {
     setSearchCA(address);
     setIsSearching(true);
     setError('');
-    setActiveTab('trade'); // Auto-switch to trade tab when searching
+    setActiveTab('trade');
     
     try {
       const res = await fetch('https://api.dexscreener.com/latest/dex/tokens/' + address);
@@ -78,60 +77,62 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen bg-neutral-950 pb-24">
+    <main className="min-h-screen bg-neutral-950 pb-28">
       
-      <div className="max-w-2xl mx-auto p-4 space-y-4">
+      <div className="max-w-2xl mx-auto p-4">
         
-        {/* --- TAB CONTENT --- */}
-        
-        {/* 1. MARKET TAB (Now Default - Contains Header, Logo, Search, Wallet) */}
+        {/* 1. MARKET TAB (Default) */}
         {activeTab === 'market' && (
-          <div className="space-y-4">
+          <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
             
-            {/* HEADER & WALLET (Only on Market) */}
-            <div className="flex items-center justify-between py-2">
-              <h1 className="text-2xl font-black">
+            {/* HEADER & WALLET */}
+            <div className="flex items-center justify-between pt-2">
+              <h1 className="text-2xl font-black tracking-tighter">
                 <span className="text-emerald-400">Trade</span><span className="text-cyan-400">Bus</span>
               </h1>
-              <WalletMultiButton style={{ backgroundColor: '#10b981', borderRadius: '0.5rem', height: '40px' }} />
+              <WalletMultiButton style={{ backgroundColor: '#10b981', borderRadius: '0.75rem', height: '40px', fontSize: '14px', fontWeight: 'bold' }} />
             </div>
 
-            {/* SEARCH BAR (Only on Market) */}
-            <div className="relative flex items-center mb-6">
-              <Search className="absolute left-3 text-neutral-500 w-5 h-5" />
+            {/* SEARCH BAR */}
+            <div className="relative flex items-center">
+              <Search className="absolute left-4 text-neutral-500 w-5 h-5" />
               <input 
                 type="text" 
                 value={searchCA} 
                 onChange={(e) => setSearchCA(e.target.value)} 
                 onKeyDown={(e) => e.key === 'Enter' && handleSearch()} 
-                placeholder="Search token CA..." 
-                className="w-full pl-10 pr-24 py-3 rounded-xl bg-neutral-900 border border-neutral-800 text-white font-mono text-sm focus:border-emerald-500 outline-none" 
+                placeholder="Search token by CA..." 
+                className="w-full pl-12 pr-28 py-4 rounded-2xl bg-neutral-900 border border-neutral-800 text-white font-mono text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all shadow-inner" 
               />
               <button 
                 onClick={() => handleSearch()} 
                 disabled={isSearching} 
-                className="absolute right-2 px-4 py-1.5 rounded-lg bg-emerald-500 text-black font-bold text-sm hover:bg-emerald-400 disabled:opacity-50"
+                className="absolute right-2 px-5 py-2.5 rounded-xl bg-emerald-500 text-black font-bold text-sm hover:bg-emerald-400 disabled:opacity-50 transition-colors"
               >
                 {isSearching ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Search'}
               </button>
             </div>
 
-            {error && <div className="text-red-400 text-sm text-center bg-red-500/10 py-2 rounded-lg">{error}</div>}
+            {error && <div className="text-red-400 text-sm text-center bg-red-500/10 py-3 rounded-xl border border-red-500/20">{error}</div>}
 
-            <h2 className="text-sm font-bold text-neutral-400 uppercase tracking-wider mb-3">Market Tokens</h2>
-            <TokenList onTokenSelect={handleSearch} />
+            <div>
+              <h2 className="text-sm font-bold text-neutral-400 uppercase tracking-wider mb-3">Trending Markets</h2>
+              <TokenList onTokenSelect={handleSearch} />
+            </div>
           </div>
         )}
 
-        {/* 2. TRADE TAB (Clean, no header) */}
+        {/* 2. TRADE TAB */}
         {activeTab === 'trade' && (
-          <div className="space-y-4 pt-4">
+          <div className="space-y-6 pt-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <TimeframeSelector selected={tf} onChange={setTf} />
             
             <h2 className="text-sm font-bold text-neutral-400 uppercase tracking-wider mb-3">Live Setups</h2>
             {setups.length === 0 ? (
-              <div className="text-center text-neutral-500 py-8 bg-neutral-900 rounded-xl border border-neutral-800">
-                No clear entries on this timeframe.
+              <div className="text-center text-neutral-500 py-12 bg-neutral-900 rounded-2xl border border-neutral-800 flex flex-col items-center">
+                <Search className="w-8 h-8 mb-2 opacity-50" />
+                <p>No clear entries on this timeframe.</p>
+                <p className="text-xs mt-1">Try searching a token in the Market tab.</p>
               </div>
             ) : (
               setups.map(s => <BusCard key={s.id} setup={s} onBoard={setModalSetup} />)
@@ -139,17 +140,18 @@ export default function Home() {
           </div>
         )}
 
-        {/* 3. PORTFOLIO TAB (Clean, no header) */}
+        {/* 3. PORTFOLIO TAB */}
         {activeTab === 'portfolio' && (
-          <div className="space-y-4 pt-4">
-            <h2 className="text-lg font-bold text-white mb-4">Portfolio</h2>
+          <div className="space-y-6 pt-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <h2 className="text-lg font-bold text-white mb-2">Portfolio</h2>
             <Portfolio />
           </div>
         )}
 
-        {/* 4. SETTINGS TAB (Clean, no header) */}
+        {/* 4. SETTINGS TAB */}
         {activeTab === 'settings' && (
-          <div className="pt-4">
+          <div className="pt-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <h2 className="text-lg font-bold text-white mb-4">Profile & Settings</h2>
             <Settings />
           </div>
         )}
@@ -157,7 +159,6 @@ export default function Home() {
 
       <TradeModal setup={modalSetup} walletBalanceUsdc={100} onClose={() => setModalSetup(null)} onConfirm={() => setModalSetup(null)} />
       
-      {/* BOTTOM NAVIGATION */}
       <BottomNav activeTab={activeTab} setActiveTab={setActiveTab} />
     </main>
   );
