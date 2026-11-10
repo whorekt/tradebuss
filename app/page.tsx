@@ -28,7 +28,7 @@ export default function Home() {
   const [searchResult, setSearchResult] = useState<SignalSetup | null>(null);
   const [error, setError] = useState('');
   
-  // TAB STATE
+  // TAB STATE - Defaults to 'trade' (Home)
   const [activeTab, setActiveTab] = useState('trade');
 
   const setups = tf === '1h' ? (searchResult ? [searchResult] : [SOL_SETUP]) : [];
@@ -80,49 +80,43 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-neutral-950 pb-24">
       
-      {/* HEADER & SEARCH */}
       <div className="max-w-2xl mx-auto p-4 space-y-4">
-        <div className="flex items-center justify-between py-2">
-          <h1 className="text-2xl font-black">
-            <span className="text-emerald-400">Trade</span><span className="text-cyan-400">Bus</span>
-          </h1>
-          <WalletMultiButton style={{ backgroundColor: '#10b981', borderRadius: '0.5rem', height: '40px' }} />
-        </div>
-
-        <div className="relative flex items-center mb-6">
-          <Search className="absolute left-3 text-neutral-500 w-5 h-5" />
-          <input 
-            type="text" 
-            value={searchCA} 
-            onChange={(e) => setSearchCA(e.target.value)} 
-            onKeyDown={(e) => e.key === 'Enter' && handleSearch()} 
-            placeholder="Search token CA..." 
-            className="w-full pl-10 pr-24 py-3 rounded-xl bg-neutral-900 border border-neutral-800 text-white font-mono text-sm focus:border-emerald-500 outline-none" 
-          />
-          <button 
-            onClick={() => handleSearch()} 
-            disabled={isSearching} 
-            className="absolute right-2 px-4 py-1.5 rounded-lg bg-emerald-500 text-black font-bold text-sm hover:bg-emerald-400 disabled:opacity-50"
-          >
-            {isSearching ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Search'}
-          </button>
-        </div>
-
-        {error && <div className="text-red-400 text-sm text-center bg-red-500/10 py-2 rounded-lg">{error}</div>}
-
+        
         {/* --- TAB CONTENT --- */}
         
-        {/* 1. MARKET TAB */}
-        {activeTab === 'market' && (
-          <div className="space-y-4">
-            <h2 className="text-sm font-bold text-neutral-400 uppercase tracking-wider">Market</h2>
-            <TokenList onTokenSelect={handleSearch} />
-          </div>
-        )}
-
-        {/* 2. TRADE TAB */}
+        {/* 1. HOME / TRADE TAB (Contains Header, Logo, Search, Wallet) */}
         {activeTab === 'trade' && (
           <div className="space-y-4">
+            {/* HEADER & WALLET (Only on Home) */}
+            <div className="flex items-center justify-between py-2">
+              <h1 className="text-2xl font-black">
+                <span className="text-emerald-400">Trade</span><span className="text-cyan-400">Bus</span>
+              </h1>
+              <WalletMultiButton style={{ backgroundColor: '#10b981', borderRadius: '0.5rem', height: '40px' }} />
+            </div>
+
+            {/* SEARCH BAR (Only on Home) */}
+            <div className="relative flex items-center mb-6">
+              <Search className="absolute left-3 text-neutral-500 w-5 h-5" />
+              <input 
+                type="text" 
+                value={searchCA} 
+                onChange={(e) => setSearchCA(e.target.value)} 
+                onKeyDown={(e) => e.key === 'Enter' && handleSearch()} 
+                placeholder="Search token CA..." 
+                className="w-full pl-10 pr-24 py-3 rounded-xl bg-neutral-900 border border-neutral-800 text-white font-mono text-sm focus:border-emerald-500 outline-none" 
+              />
+              <button 
+                onClick={() => handleSearch()} 
+                disabled={isSearching} 
+                className="absolute right-2 px-4 py-1.5 rounded-lg bg-emerald-500 text-black font-bold text-sm hover:bg-emerald-400 disabled:opacity-50"
+              >
+                {isSearching ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Search'}
+              </button>
+            </div>
+
+            {error && <div className="text-red-400 text-sm text-center bg-red-500/10 py-2 rounded-lg">{error}</div>}
+
             <TimeframeSelector selected={tf} onChange={setTf} />
             
             <h2 className="text-sm font-bold text-neutral-400 uppercase tracking-wider mb-3">Live Setups</h2>
@@ -136,18 +130,25 @@ export default function Home() {
           </div>
         )}
 
-        {/* 3. PORTFOLIO TAB */}
+        {/* 2. MARKET TAB (Clean, no header) */}
+        {activeTab === 'market' && (
+          <div className="space-y-4 pt-4">
+            <h2 className="text-lg font-bold text-white mb-4">Market</h2>
+            <TokenList onTokenSelect={handleSearch} />
+          </div>
+        )}
+
+        {/* 3. PORTFOLIO TAB (Clean, no header) */}
         {activeTab === 'portfolio' && (
-          <div className="space-y-4">
-            <h2 className="text-sm font-bold text-neutral-400 uppercase tracking-wider">Portfolio</h2>
+          <div className="space-y-4 pt-4">
+            <h2 className="text-lg font-bold text-white mb-4">Portfolio</h2>
             <Portfolio />
           </div>
         )}
 
-        {/* 4. SETTINGS TAB */}
+        {/* 4. SETTINGS TAB (Clean, no header) */}
         {activeTab === 'settings' && (
-          <div className="space-y-4">
-            <h2 className="text-sm font-bold text-neutral-400 uppercase tracking-wider">Settings</h2>
+          <div className="pt-4">
             <Settings />
           </div>
         )}
